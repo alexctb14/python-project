@@ -15,6 +15,32 @@ symbol_count = {
     "D": 8
 }
 
+# Winnings multiplier 
+symbol_value = {
+    "A": 5,
+    "B": 4,
+    "C": 3,
+    "D": 2
+}
+
+# Loop through every row user bet on, check to make sure all the symbols match the symbol in the first column, if the user wins then the amount is added to their winnings and returns the lines the user won on
+def check_winnings(columns, lines, bet, values) :
+    winnings = 0
+    winning_lines = []
+    for line in range(lines):
+        symbol = columns[0][line]
+        for column in columns:
+            symbol_to_check = column[line]
+            if symbol != symbol_to_check:
+                break
+        else:
+            winnings += values[symbol] * bet
+            winning_lines.append(line + 1)
+
+    return winnings, winning_lines
+
+
+
 # Function that assigns symbols to the slot machine columns
 def getSlotMachineSpin(rows, cols, symbols):
     allSymbols = []
@@ -99,8 +125,7 @@ def getBet():
 
     return amount
 
-def app():
-    balance = deposit()
+def spin(balance):
     lines = getNumberOfLines()
 
     # While loop to check if the user has sufficient funds for the bet they are trying to make
@@ -117,5 +142,23 @@ def app():
 
     slots = getSlotMachineSpin(ROWS, COLS, symbol_count)
     printSlotMachine(slots)
+    winnings, winning_lines = check_winnings(slots, lines, bet, symbol_value)
+    print(f"You won ${winnings}!")
+    # Splat operator passes every line from winnings_lines list to the print function
+    print(f"You won on lines:", *winning_lines)
+    return winnings - totalBet
+ 
+
+def app():
+    balance = deposit()
+    while True:
+        print(f"Current balance is ${balance}")
+        answer = input("Press enter to play (q to quit).")
+        if answer == "q":
+            break
+        # Spin() is returning what the user won/lost so we update the user balance based on the result
+        balance += spin(balance)
+
+    print(f"You left with ${balance}")
 
 app()
